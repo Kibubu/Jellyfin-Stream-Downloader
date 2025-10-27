@@ -2,8 +2,6 @@
 
 A simple Python script to download all media files from a Jellyfin server.
 
-Not a direct fork, but many parts were taken from https://github.com/DrewThomasson/ipod-JellyFin-Downloader
-
 ## Requirements
 
 - Python 3.6+
@@ -20,15 +18,35 @@ Not a direct fork, but many parts were taken from https://github.com/DrewThomass
 
 ## Configuration
 
-Edit the configuration section at the top of `getJellyfin.py`:
+The script supports configuration via environment variables or by editing the configuration section in `getJellyfin.py`.
+
+### Environment Variables (Recommended)
+
+Create a `.env` file or set environment variables:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit with your values
+JELLYFIN_URL=https://your-jellyfin-server.com
+USER_NAME=your_username
+JELLYFIN_PASSWORD=your_password
+DOWNLOAD_PATH=/data
+DRY_RUN=false
+```
+
+### Direct Configuration
+
+Alternatively, edit the configuration section at the top of `getJellyfin.py`:
 
 ```python
 # --- CONFIGURATION ---
-JELLYFIN_URL = "https://your-jellyfin-server.com"
-USER_NAME = "your_username"
-JELLYFIN_PASSWORD = "your_password"
-DOWNLOAD_PATH = '/path/to/download/folder'
-DRY_RUN = False  # Set to True to test without downloading
+JELLYFIN_URL = os.getenv('JELLYFIN_URL', 'https://your-jellyfin-server.com')
+USER_NAME = os.getenv('USER_NAME', 'your_username')
+JELLYFIN_PASSWORD = os.getenv('JELLYFIN_PASSWORD', 'your_password')
+DOWNLOAD_PATH = os.getenv('DOWNLOAD_PATH', '/data')
+DRY_RUN = os.getenv('DRY_RUN', 'false').lower() in ('true', '1', 'yes', 'on')
 ```
 
 ### Configuration Options
@@ -37,11 +55,37 @@ DRY_RUN = False  # Set to True to test without downloading
 - `USER_NAME`: Your Jellyfin username
 - `JELLYFIN_PASSWORD`: Your Jellyfin password
 - `DOWNLOAD_PATH`: Local directory where files will be saved
-- `DRY_RUN`: Set to `True` to see what would be downloaded without actually downloading
+- `DRY_RUN`: Set to `true` to see what would be downloaded without actually downloading
 
 ## Usage
 
-1. Configure the script with your Jellyfin server details
+### Docker (Recommended)
+
+1. Create a `.env` file with your configuration:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Jellyfin server details
+   ```
+
+2. Build and run with Docker:
+   ```bash
+   # Build the image
+   docker build -t jellyfin-downloader .
+
+   # Run with environment file
+   docker run --env-file .env -v $(pwd)/downloads:/data jellyfin-downloader
+
+   # Or run with individual environment variables
+   docker run -e JELLYFIN_URL=https://your-server.com \
+              -e USER_NAME=your_user \
+              -e JELLYFIN_PASSWORD=your_pass \
+              -v $(pwd)/downloads:/data \
+              jellyfin-downloader
+   ```
+
+### Direct Python
+
+1. Configure the script with your Jellyfin server details (via environment variables or editing the file)
 2. Run the script:
    ```bash
    python3 getJellyfin.py
